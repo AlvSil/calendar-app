@@ -1,0 +1,21 @@
+.testcol {
+  width: 14.2%;
+  background-color: #ffffff;
+  border-width: 1px;
+  border-color: black;
+  border-style: inset;
+}
+
+.square {
+  padding-top: 100px;
+}
+
+.text {
+  position: relative;
+  bottom: 100px;
+  left: 10px;
+}
+
+.weekdaysText {
+  text-align: center;
+}
