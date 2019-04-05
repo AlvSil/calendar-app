@@ -6,7 +6,7 @@ const CalendarDay = (props) => (
         {props.dayNumber}
       </div>
       <div>
-        {props.reminderList.map(reminder => <div className="text">{reminder.text}</div>)}
+        {props.reminderList.map(reminder => <input type="button" className="text" value={reminder.text} onClick={() => props.loadReminder(reminder)}></input>)}
       </div>
     </div>
   )

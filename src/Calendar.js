@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import CalendarDay from './CalendarDay';
 
 import { connect } from 'react-redux'
-import { addReminderToDate } from './actions'
+import { addReminderToDate, deleteReminder, updateReminder } from './actions'
 
 import './Calendar.css';
 
@@ -15,9 +15,9 @@ class Calendar extends Component {
     this.state = {
       visibleDate: new Date(),
       numberOfDays: new Array(getAmountOfDaysInMonth(new Date())).fill(null),
-      selectedDay: new Date().getDate(),
-      selectedMonth: new Date().getMonth()+1,
-      selectedYear: new Date().getFullYear(),
+      selectedDay: null,
+      selectedMonth: null,
+      selectedYear: null,
       daysOfTheWeek: [
         {abb:'Sun'},
         {abb:'Mon'},
@@ -32,7 +32,9 @@ class Calendar extends Component {
       reminderDate: null,
       selectedHours: "0",
       selectedMinutes: "0",
-      reminderTextInput: ""
+      reminderTextInput: "",
+      isReminderSelected: false,
+      selectedReminderId: null
     }
   }
   setReminderDate = (date) => {
@@ -46,7 +48,14 @@ class Calendar extends Component {
     })
   }
   getRemindersByDate = (day, month) => this.props.reminders.filter(reminder => reminder.date.getMonth()+1 === month && reminder.date.getDate() === day);
-
+  loadReminder = (reminder) => this.setState({
+    selectedHours: reminder.date.getHours(),
+    selectedMinutes: reminder.date.getMinutes(),
+    reminderTextInput: reminder.text,
+    reminderDate: reminder.date,
+    isReminderSelected: true,
+    selectedReminderId: reminder.id
+  });
   render() {
     return (
       <React.Fragment>
@@ -66,9 +75,9 @@ class Calendar extends Component {
                 key={index}
                 dayNumber={index + 1}
                 date={new Date(this.state.visibleDate.getFullYear(), this.state.visibleDate.getMonth(), index + 1)}
-                addReminderToDate={this.props.addReminderToDate}
                 setReminderDate={this.setReminderDate}
                 reminderList={this.getRemindersByDate(index+1, this.state.visibleDate.getMonth()+1)}
+                loadReminder={this.loadReminder}
               />
             )}
           </div>
@@ -80,14 +89,14 @@ class Calendar extends Component {
           </div>
           <div className="row">
             <label>Time</label>
-            <select onChange={
+            <select disabled={this.state.reminderDate === null} onChange={
                 (e) => this.setState({
                   reminderDate: new Date(this.state.reminderDate.setHours(e.target.value)),
                   selectedHours: e.target.value
                 })}>
               {this.state.hours.map((empty, index) => <option value={index}>{index}</option>)}
             </select>
-            <select onChange={
+            <select disabled={this.state.reminderDate === null} onChange={
                 (e) => this.setState({
                   reminderDate: new Date(this.state.reminderDate.setMinutes(e.target.value)),
                   selectedMinutes: e.target.value
@@ -100,7 +109,23 @@ class Calendar extends Component {
             <input value={this.state.reminderTextInput} onChange={(e) => this.setState({reminderTextInput: e.target.value})} maxLength="30"/>
           </div>
           <div className="row">
-            <input type="button" value="Add" onClick={() => this.props.addReminderToDate(this.state.reminderTextInput, this.state.reminderDate)} />
+            <input disabled={this.state.reminderDate === null || this.state.reminderTextInput === "" || this.state.isReminderSelected} type="button" value="Add" onClick={() => this.props.addReminderToDate(this.state.reminderTextInput, this.state.reminderDate)} />
+            <input disabled={!this.state.isReminderSelected} type="button" value="Update"
+              onClick={() => {
+                this.props.updateReminder(this.state.selectedReminderId, this.state.reminderTextInput, this.state.reminderDate);
+                this.setState({
+                  selectedReminderId: null,
+                  isReminderSelected: false
+              })
+            }} />
+            <input disabled={!this.state.isReminderSelected} type="button" value="Delete"
+              onClick={() => {
+                this.props.deleteReminder(this.state.selectedReminderId)
+                this.setState({
+                  selectedReminderId: null,
+                  isReminderSelected: false
+                })
+              }} />
           </div>
         </div>
       </React.Fragment>
@@ -113,7 +138,9 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  addReminderToDate: (text, date) => dispatch(addReminderToDate(text, date))
+  addReminderToDate: (text, date) => dispatch(addReminderToDate(text, date)),
+  deleteReminder: id => dispatch(deleteReminder(id)),
+  updateReminder: (id, text, date) => dispatch(updateReminder(id, text, date))
 })
 
 export default connect(

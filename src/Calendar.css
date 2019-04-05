@@ -16,6 +16,9 @@
   position: relative;
   bottom: 100px;
   left: 10px;
+  border: none;
+  width: 100%;
+  text-align: left;
 }
 
 .weekdaysText {
