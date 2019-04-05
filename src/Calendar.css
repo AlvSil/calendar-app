@@ -8,6 +8,8 @@
 
 .square {
   padding-top: 100px;
+  max-height: 125px;
+  overflow: auto;
 }
 
 .text {

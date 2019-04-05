@@ -36,15 +36,17 @@ class Calendar extends Component {
     }
   }
   setReminderDate = (date) => {
-    let updatedHours = new Date(date.setHours(this.state.selectedHours))
-    let updatedTime = new Date(updatedHours.setMinutes(this.state.selectedMinutes))
+    let updatedHours = new Date(date.setHours(this.state.selectedHours));
+    let updatedTime = new Date(updatedHours.setMinutes(this.state.selectedMinutes));
     this.setState({
       selectedDay: date.getDate(),
-      selectedMonth: date.getMonth(),
+      selectedMonth: date.getMonth()+1,
       selectedYear: date.getFullYear(),
       reminderDate: updatedTime
     })
   }
+  getRemindersByDate = (day, month) => this.props.reminders.filter(reminder => reminder.date.getMonth()+1 === month && reminder.date.getDate() === day);
+
   render() {
     return (
       <React.Fragment>
@@ -66,6 +68,7 @@ class Calendar extends Component {
                 date={new Date(this.state.visibleDate.getFullYear(), this.state.visibleDate.getMonth(), index + 1)}
                 addReminderToDate={this.props.addReminderToDate}
                 setReminderDate={this.setReminderDate}
+                reminderList={this.getRemindersByDate(index+1, this.state.visibleDate.getMonth()+1)}
               />
             )}
           </div>
@@ -94,7 +97,7 @@ class Calendar extends Component {
           </div>
           <div className="row">
             <label>Reminder</label>
-            <input value={this.state.reminderTextInput} onChange={(e) => this.setState({reminderTextInput: e.target.value})} maxlength="30"/>
+            <input value={this.state.reminderTextInput} onChange={(e) => this.setState({reminderTextInput: e.target.value})} maxLength="30"/>
           </div>
           <div className="row">
             <input type="button" value="Add" onClick={() => this.props.addReminderToDate(this.state.reminderTextInput, this.state.reminderDate)} />
