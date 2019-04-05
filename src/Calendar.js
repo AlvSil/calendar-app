@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import CalendarDay from './CalendarDay';
+
+import { connect } from 'react-redux'
+import { addReminderToDate } from './actions'
+
 import './Calendar.css';
 
 class Calendar extends Component {
@@ -23,10 +27,6 @@ class Calendar extends Component {
       ]
     }
   }
-  addReminderToDate(reminderText, reminderDate) {
-    console.log('reminderText', reminderText);
-    console.log('reminderDate', reminderDate);
-  }
   render() {
     return (
       <div className="container">
@@ -42,10 +42,10 @@ class Calendar extends Component {
         <div className="row">
           {this.state.numberOfDays.map((num, index) => 
             <CalendarDay
-              key={index+1}
-              dayNumber={index+1}
-              date={new Date(this.state.visibleDate.getFullYear(), this.state.visibleDate.getMonth(), index+1)}
-              addReminderToDate={this.addReminderToDate}
+              key={index}
+              dayNumber={index + 1}
+              date={new Date(this.state.visibleDate.getFullYear(), this.state.visibleDate.getMonth(), index + 1)}
+              addReminderToDate={this.props.addReminderToDate}
             />
           )}
         </div>
@@ -53,4 +53,16 @@ class Calendar extends Component {
     );
   }
 }
-export default Calendar;
+
+const mapStateToProps = state => {
+  return state;
+};
+
+const mapDispatchToProps = dispatch => ({
+  addReminderToDate: (text, date) => dispatch(addReminderToDate(text, date))
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Calendar)
