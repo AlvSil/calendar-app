@@ -9,55 +9,45 @@ class Calendar extends Component {
       return new Date(date.getFullYear(), date.getMonth()+1,0).getDate();
     };
     this.state = {
-      numberOfDays: getAmountOfDaysInMonth(new Date()),
+      visibleDate: new Date(),
+      numberOfDays: new Array(getAmountOfDaysInMonth(new Date())).fill(null),
       selectedDay: 3,
-      arrayOfNumbers: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+      daysOfTheWeek: [
+        {abb:'Sun'},
+        {abb:'Mon'},
+        {abb:'Tue'},
+        {abb:'Wed'},
+        {abb:'Thu'},
+        {abb:'Fri'},
+        {abb:'Sat'}
+      ]
     }
+  }
+  addReminderToDate(reminderText, reminderDate) {
+    console.log('reminderText', reminderText);
+    console.log('reminderDate', reminderDate);
   }
   render() {
     return (
       <div className="container">
         <div className="row">
-          <div className='testcol'>
-            <div className="weekdaysText">
-              Sun
+          {this.state.daysOfTheWeek.map((day) => (
+            <div key={day.abb} className='testcol'>
+              <div className="weekdaysText">
+                {day.abb}
+              </div>
             </div>
-          </div>
-          <div className='testcol'>
-            <div className="weekdaysText">
-              Mon
-            </div>
-          </div>
-          <div className='testcol'>
-            <div className="weekdaysText">
-              Tue
-            </div>
-          </div>
-          <div className='testcol'>
-            <div className="weekdaysText">
-              Wed
-            </div>
-          </div>
-          <div className='testcol'>
-            <div className="weekdaysText">
-              Thu
-            </div>
-          </div>
-          <div className='testcol'>
-            <div className="weekdaysText">
-              Fri
-            </div>
-          </div>
-          <div className='testcol'>
-            <div className="weekdaysText">
-              Sat
-            </div>
-          </div>
+          ))}
         </div>
         <div className="row">
-          {this.state.arrayOfNumbers.map((num) => 
-          <CalendarDay dayNumber={num} numberOfDays={30} />
-          )}          
+          {this.state.numberOfDays.map((num, index) => 
+            <CalendarDay
+              key={index+1}
+              dayNumber={index+1}
+              date={new Date(this.state.visibleDate.getFullYear(), this.state.visibleDate.getMonth(), index+1)}
+              addReminderToDate={this.addReminderToDate}
+            />
+          )}
         </div>
       </div>
     );
