@@ -1,41 +1,59 @@
 import React, { Component } from 'react';
-import CalendarDay from './CalendarDay';
+import { connect } from 'react-redux';
 
-import { connect } from 'react-redux'
-import { addReminderToDate, deleteReminder, updateReminder } from './actions'
+import { addReminderToDate, deleteReminder, updateReminder } from './actions';
+import ReminderFields from './ReminderFields';
+import CalendarDay from './CalendarDay';
 
 import './Calendar.css';
 
 class Calendar extends Component {
   constructor() {
     super();
-    function getAmountOfDaysInMonth(date) {
-      return new Date(date.getFullYear(), date.getMonth()+1,0).getDate();
-    };
     this.state = {
       visibleDate: new Date(),
-      numberOfDays: new Array(getAmountOfDaysInMonth(new Date())).fill(null),
       selectedDay: null,
       selectedMonth: null,
       selectedYear: null,
-      daysOfTheWeek: [
-        {abb:'Sun'},
-        {abb:'Mon'},
-        {abb:'Tue'},
-        {abb:'Wed'},
-        {abb:'Thu'},
-        {abb:'Fri'},
-        {abb:'Sat'}
-      ],
-      hours: new Array(24).fill(null),
-      minutes: new Array(60).fill(null),
       reminderDate: null,
       selectedHours: "0",
       selectedMinutes: "0",
       reminderTextInput: "",
       isReminderSelected: false,
-      selectedReminderId: null
+      selectedReminderId: null,
+      reminderColor: "#008000"
     }
+  }
+
+  colorList = [
+    {
+      code: "#008000",
+      name: "green",
+    },
+    {
+      code: "#FFFF00",
+      name: "yellow",
+    },
+    {
+      code: "#FF0000",
+      name: "red",
+    }
+  ];
+  daysOfTheWeek = [
+    {abb:'Sun'},
+    {abb:'Mon'},
+    {abb:'Tue'},
+    {abb:'Wed'},
+    {abb:'Thu'},
+    {abb:'Fri'},
+    {abb:'Sat'}
+  ];
+  amountOfDays = new Array(this.getAmountOfDaysInMonth(new Date())).fill(null);
+  amountOfHours = new Array(24).fill(null);
+  amountOfMinutes = new Array(60).fill(null);
+
+  getAmountOfDaysInMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth()+1,0).getDate();
   }
   setReminderDate = (date) => {
     let updatedHours = new Date(date.setHours(this.state.selectedHours));
@@ -44,24 +62,63 @@ class Calendar extends Component {
       selectedDay: date.getDate(),
       selectedMonth: date.getMonth()+1,
       selectedYear: date.getFullYear(),
-      reminderDate: updatedTime
+      reminderDate: updatedTime,
+      isReminderSelected: false
     })
   }
   getRemindersByDate = (day, month) => this.props.reminders.filter(reminder => reminder.date.getMonth()+1 === month && reminder.date.getDate() === day);
-  loadReminder = (reminder) => this.setState({
-    selectedHours: reminder.date.getHours(),
-    selectedMinutes: reminder.date.getMinutes(),
-    reminderTextInput: reminder.text,
-    reminderDate: reminder.date,
-    isReminderSelected: true,
-    selectedReminderId: reminder.id
-  });
+  loadReminder = (reminder) => {
+    this.setState({
+      selectedHours: reminder.date.getHours(),
+      selectedMinutes: reminder.date.getMinutes(),
+      reminderTextInput: reminder.text,
+      reminderDate: reminder.date,
+      isReminderSelected: true,
+      selectedReminderId: reminder.id,
+      reminderColor: reminder.color
+    });
+  }
+  deleteReminder = () => {
+    this.props.deleteReminder(this.state.selectedReminderId)
+    this.setState({
+      selectedReminderId: null,
+      isReminderSelected: false
+    })
+  }
+  updateReminder = () => {
+    this.props.updateReminder(this.state.selectedReminderId, this.state.reminderTextInput, this.state.reminderDate, this.state.reminderColor);
+    this.setState({
+      selectedReminderId: null,
+      isReminderSelected: false
+    })
+  }
+  updateReminderColor = (colorValue) => {
+    this.setState({
+      reminderColor: colorValue
+    })
+  }
+  updateReminderText = (reminderTextInput) => {
+    this.setState({reminderTextInput})
+  }
+  updateHours = (hours) => {
+    this.setState({
+      reminderDate: new Date(this.state.reminderDate.setHours(hours)),
+      selectedHours: hours
+    })
+  }
+  updateMinutes = (minutes) => {
+    this.setState({
+      reminderDate: new Date(this.state.reminderDate.setMinutes(minutes)),
+      selectedMinutes: minutes
+    })
+  }
   render() {
+    console.log('calendar state', this.state)
     return (
       <React.Fragment>
         <div className="container">
           <div className="row">
-            {this.state.daysOfTheWeek.map((day) => (
+            {this.daysOfTheWeek.map((day) => (
               <div key={day.abb} className='testcol'>
                 <div className="weekdaysText">
                   {day.abb}
@@ -70,7 +127,7 @@ class Calendar extends Component {
             ))}
           </div>
           <div className="row">
-            {this.state.numberOfDays.map((empty, index) => 
+            {this.amountOfDays.map((empty, index) => 
               <CalendarDay
                 key={index}
                 dayNumber={index + 1}
@@ -82,52 +139,25 @@ class Calendar extends Component {
             )}
           </div>
         </div>
-        <div className="container">
-          <div className="row">
-            <label>Day</label>
-            <input id="day" value={`${this.state.selectedDay}/${this.state.selectedMonth}/${this.state.selectedYear}`}></input>
-          </div>
-          <div className="row">
-            <label>Time</label>
-            <select disabled={this.state.reminderDate === null} onChange={
-                (e) => this.setState({
-                  reminderDate: new Date(this.state.reminderDate.setHours(e.target.value)),
-                  selectedHours: e.target.value
-                })}>
-              {this.state.hours.map((empty, index) => <option value={index}>{index}</option>)}
-            </select>
-            <select disabled={this.state.reminderDate === null} onChange={
-                (e) => this.setState({
-                  reminderDate: new Date(this.state.reminderDate.setMinutes(e.target.value)),
-                  selectedMinutes: e.target.value
-                })}>
-              {this.state.minutes.map((empty, index) => <option value={index}>{index}</option>)}
-            </select>
-          </div>
-          <div className="row">
-            <label>Reminder</label>
-            <input value={this.state.reminderTextInput} onChange={(e) => this.setState({reminderTextInput: e.target.value})} maxLength="30"/>
-          </div>
-          <div className="row">
-            <input disabled={this.state.reminderDate === null || this.state.reminderTextInput === "" || this.state.isReminderSelected} type="button" value="Add" onClick={() => this.props.addReminderToDate(this.state.reminderTextInput, this.state.reminderDate)} />
-            <input disabled={!this.state.isReminderSelected} type="button" value="Update"
-              onClick={() => {
-                this.props.updateReminder(this.state.selectedReminderId, this.state.reminderTextInput, this.state.reminderDate);
-                this.setState({
-                  selectedReminderId: null,
-                  isReminderSelected: false
-              })
-            }} />
-            <input disabled={!this.state.isReminderSelected} type="button" value="Delete"
-              onClick={() => {
-                this.props.deleteReminder(this.state.selectedReminderId)
-                this.setState({
-                  selectedReminderId: null,
-                  isReminderSelected: false
-                })
-              }} />
-          </div>
-        </div>
+        <ReminderFields
+          amountOfHours={this.amountOfHours}
+          amountOfMinutes={this.amountOfMinutes}
+          colorList={this.colorList}
+          selectedDay={this.state.selectedDay}
+          selectedMonth={this.state.selectedMonth}
+          selectedYear={this.state.selectedYear}
+          reminderDate={this.state.reminderDate}
+          reminderTextInput={this.state.reminderTextInput}
+          reminderColor={this.state.reminderColor}
+          isReminderSelected={this.state.isReminderSelected}
+          updateHours={this.updateHours}
+          updateMinutes={this.updateMinutes}
+          updateReminderText={this.updateReminderText}
+          updateReminderColor={this.updateReminderColor}
+          addReminderToDate={this.props.addReminderToDate}
+          deleteReminder={this.deleteReminder}
+          updateReminder={this.updateReminder}
+        />
       </React.Fragment>
     );
   }
@@ -138,9 +168,9 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  addReminderToDate: (text, date) => dispatch(addReminderToDate(text, date)),
+  addReminderToDate: (text, date, color) => dispatch(addReminderToDate(text, date, color)),
   deleteReminder: id => dispatch(deleteReminder(id)),
-  updateReminder: (id, text, date) => dispatch(updateReminder(id, text, date))
+  updateReminder: (id, text, date, color) => dispatch(updateReminder(id, text, date, color))
 })
 
 export default connect(

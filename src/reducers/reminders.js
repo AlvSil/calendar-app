@@ -7,7 +7,8 @@ const reminders = (state = [], action) => {
           {
             id: action.id,
             text: action.text,
-            date: action.date
+            date: action.date,
+            color: action.color
           }
         ]
       case 'DELETE_REMINDER':
@@ -19,7 +20,8 @@ const reminders = (state = [], action) => {
           reminder.id === action.reminderId ? {
             ...reminder,
             text: action.text,
-            date: action.date
+            date: action.date,
+            color: action.color
           } : reminder
         )
       default:
