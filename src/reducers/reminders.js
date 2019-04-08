@@ -1,5 +1,4 @@
 const reminders = (state = [], action) => {
-    console.log('TRIGGERED ACTION', action)
     switch (action.type) {
       case 'ADD_REMINDER':
         return [

@@ -113,7 +113,6 @@ class Calendar extends Component {
     })
   }
   render() {
-    console.log('calendar state', this.state)
     return (
       <React.Fragment>
         <div className="container">
